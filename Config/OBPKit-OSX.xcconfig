@@ -1,0 +1,13 @@
+//
+//  OBPKit-iOS.xcconfig
+//  OBPKit
+//
+//  Created by Torsten Louland on 03/03/2016.
+//  Copyright © 2016 TESOBE Ltd. All rights reserved.
+//
+
+#include "FrameworkCommon.xcconfig"
+
+
+
+CARTHAGE_NAME_FOR_PLATFORM = Mac

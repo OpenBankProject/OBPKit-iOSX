@@ -1,0 +1,3 @@
+github "t0rst/OAuthCore" ~> 0.0.1
+github "nst/STHTTPRequest" ~> 1.1.1
+github "kishikawakatsumi/UICKeyChainStore" ~> 2.1.0

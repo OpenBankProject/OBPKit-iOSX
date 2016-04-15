@@ -1,0 +1,17 @@
+//
+//  Base.xcconfig
+//  OBPKit
+//
+//  Created by Torsten Louland on 03/03/2016.
+//  Copyright © 2016 TESOBE Ltd. All rights reserved.
+//
+
+
+
+// Switch off unhelpful help
+GCC_WARN_CHECK_SWITCH_STATEMENTS = NO
+//	...--> add a default case, and therafter newly added enum cases fly under the radar --> not a solution.
+
+GCC_WARN_MISSING_PARENTHESES = NO
+//	...--> visually balancing multiple nested parentheses is higher cognitive load than understanding operator precedence for most common basics like & v |; for the rest, use parentheses judicially and sparingly to make execution and intent clear.
+

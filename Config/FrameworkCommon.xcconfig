@@ -1,0 +1,13 @@
+//
+//  FrameworkCommon.xcconfig
+//  OBPKit
+//
+//  Created by Torsten Louland on 03/03/2016.
+//  Copyright © 2016 TESOBE Ltd. All rights reserved.
+//
+
+
+
+CARTHAGE_BUILD_DIR = $(SRCROOT)/Carthage/Build
+CARTHAGE_BUILD_PLATFORM_DIR = $(CARTHAGE_BUILD_DIR)/$(CARTHAGE_NAME_FOR_PLATFORM)
+FRAMEWORK_SEARCH_PATHS = $(inherited) $(BUILT_PRODUCTS_DIR) $(CARTHAGE_BUILD_PLATFORM_DIR)
