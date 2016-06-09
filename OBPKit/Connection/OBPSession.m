@@ -8,6 +8,11 @@
 
 #import "OBPSession.h"
 // sdk
+#if TARGET_OS_IPHONE
+#import <UIKit/UIKit.h>
+#else
+#import <AppKit/AppKit.h>
+#endif
 // ext
 #import <STHTTPRequest/STHTTPRequest.h>
 #import <OAuthCore/OAuthCore.h>
@@ -22,22 +27,43 @@
 
 NSString* const OBPSessionErrorDomain = @"OBPSession";
 
+#define DL_TOKEN_SECRET @"-"
+
 
 
 @interface OBPSession ()
 {
 	OBPServerInfo*			_serverInfo;
+	OBPMarshal*				_marshal;
+	//
+	OBPAuthMethod			_authMethod;
+	// Direct Login
+	// OAuth1
 	OBPWebViewProviderRef	_WVProvider;
 	NSString*				_callbackURLString;
 	NSString*				_requestToken;
 	NSString*				_requestTokenSecret;
 	NSString*				_verifier;
-
-	OBPMarshal*				_marshal;
 }
 @property (nonatomic, readwrite) OBPSessionState state;
 @property (nonatomic, strong) HandleResultBlock validateCompletion;
 @property (nonatomic, readwrite) BOOL valid;
+@end
+
+
+
+@interface OBPSession (OAuth1)
+- (void)startValidating1;
+- (void)addAuthorizationHeader1ToSTHTTPRequest:(STHTTPRequest*)request;
+- (void)addAuthorizationHeader1ToURLRequest:(NSMutableURLRequest*)request;
+@end
+
+
+
+@interface OBPSession (DirectLogin)
+- (void)startValidating2;
+- (void)addAuthorizationHeader2ToSTHTTPRequest:(STHTTPRequest*)request;
+- (void)addAuthorizationHeader2ToURLRequest:(NSMutableURLRequest*)request;
 @end
 
 
@@ -81,8 +107,8 @@ static OBPSessionArray* sSessions = nil;
 		return nil;
 	if (nil != (session = [self findSessionWithServerInfo: serverInfo]))
 		return session;
-	session = [[self alloc] initWithServerInfo: serverInfo
-								   webViewProvider: [OBPDefaultWebViewProvider instance]];
+	session = [[self alloc] initWithServerInfo: serverInfo];
+	session.webViewProvider = [OBPDefaultWebViewProvider instance];
 	sSessions = [sSessions arrayByAddingObject: session];
 	return session;
 }
@@ -101,7 +127,7 @@ static OBPSessionArray* sSessions = nil;
 	return [sSessions copy];
 }
 #pragma mark -
-- (instancetype)initWithServerInfo:(OBPServerInfo*)serverInfo webViewProvider:(OBPWebViewProviderRef)wvp
+- (instancetype)initWithServerInfo:(OBPServerInfo*)serverInfo
 {
 	if (!serverInfo)
 		self = nil;
@@ -110,14 +136,41 @@ static OBPSessionArray* sSessions = nil;
 
 	if (self)
 	{
-		self.webViewProvider = wvp;
 		_serverInfo = serverInfo;
 		NSDictionary* d = _serverInfo.accessData;
-		if (0 != [d[OBPServerInfo_TokenKey] length] * [d[OBPServerInfo_TokenSecret] length])
+		NSString* token = d[OBPServerInfo_TokenKey];
+		NSString* secret = d[OBPServerInfo_TokenSecret];
+		if (0 != [token length] * [secret length])
 			_valid = YES, _state = OBPSessionStateValid;
+		_authMethod = OBPAuthMethod_OAuth1;
+		if ([DL_TOKEN_SECRET isEqualToString: secret])
+			_authMethod = OBPAuthMethod_DirectLogin;
 	}
 
 	return self;
+}
+#pragma mark -
+- (void)setMarshal:(OBPMarshal*)marshal
+{
+	if (marshal && marshal.session != self)
+		marshal = nil;
+	if (_marshal != marshal)
+		_marshal = marshal;
+}
+- (OBPMarshal*)marshal
+{
+	if (_marshal == nil)
+		_marshal = [[OBPMarshal alloc] initWithSessionAuth: self];
+	return _marshal;
+}
+#pragma mark -
+- (void)setAuthMethod:(OBPAuthMethod)authMethod
+{
+	if (_authMethod != authMethod)
+	{
+		[self invalidate];
+		_authMethod = authMethod;
+	}
 }
 #pragma mark -
 - (void)validate:(HandleResultBlock)completion
@@ -127,39 +180,42 @@ static OBPSessionArray* sSessions = nil;
 	if (completion)
 	{
 		if (_state == OBPSessionStateValidating)
-			[self completedWith: nil and: nil error: nil];
+			[self invalidate];
 		_validateCompletion = completion;
-		// We keep a strong reference to the webViewProvider for the duration of our authentication process...
-		_WVProvider = _webViewProvider ?: [OBPDefaultWebViewProvider instance];
-		[self getAuthRequestToken];
+		[self startValidating];
 	}
 }
 - (void)invalidate
 {
-	[self completedWith: nil and: nil error: nil];
-}
-#pragma mark -
-- (void)completedWith:(NSString*)token and:(NSString*)secret error:(NSError*)error // Vagueness of object message name is deliberate.
-{
-	[_WVProvider resetWebViewProvider];
-	_WVProvider = nil;
-	_callbackURLString = nil;
-	_requestToken = nil;
-	_requestTokenSecret = nil;
-	_verifier = nil;
-
-	if ([token length] && [secret length])
-		_state = OBPSessionStateValid;
-	else
-		_state = OBPSessionStateInvalid, token = secret = @"";
-	BOOL	validWas = _valid;
-	BOOL	validNow = _state == OBPSessionStateValid;
-
-	_serverInfo.accessData = @{
-		OBPServerInfo_TokenKey		: token,
-		OBPServerInfo_TokenSecret	: secret,
+	NSDictionary*	data = @{
+		OBPServerInfo_TokenKey		: @"",
+		OBPServerInfo_TokenSecret	: @"",
 	};
-
+	[self endWithState: OBPSessionStateInvalid data: data error: nil];
+}
+- (void)startValidating
+{
+	switch (_authMethod)
+	{
+		case OBPAuthMethod_None:
+			[self endWithState: OBPSessionStateValid data: nil error: nil];
+			break;
+		case OBPAuthMethod_OAuth1:
+			[self startValidating1];
+			break;
+		case OBPAuthMethod_DirectLogin:
+			[self startValidating2];
+			break;
+		default:
+			break;
+	}
+}
+- (void)endWithState:(OBPSessionState)newState data:(NSDictionary*)data error:(NSError*)error // Vagueness of object message name is deliberate.
+{
+	BOOL	validNow = newState == OBPSessionStateValid;
+	BOOL	validWas = _valid;
+	_state = newState;
+	_serverInfo.accessData = data;
 	if (_validateCompletion)
 	{
 		// We want to call the completion function before KV observers of our valid property get notified.
@@ -172,6 +228,125 @@ static OBPSessionArray* sSessions = nil;
 		_valid = validWas; // temporarily reset _valid to old value so KVO will be triggered next...
 	}
 	self.valid = validNow;
+}
+#pragma mark -
+- (HandleResultBlock)detectRevokeBlockWithChainToBlock:(HandleResultBlock)chainBlock
+{
+	HandleResultBlock	block =
+		^(NSError* error)
+		{
+			switch (error.code)
+			{
+				case 401:
+					OBP_LOG(@"Request got 401 Unauthorized => Access to server %@ revoked", self.serverInfo.name);
+					[self invalidate];
+					break;
+
+				case NSURLErrorUserAuthenticationRequired:
+					if (![error.domain isEqualToString: NSURLErrorDomain])
+						break;
+					OBP_LOG(@"Request got NSURLErrorUserAuthenticationRequired => Access to server %@ revoked", self.serverInfo.name);
+					[self invalidate];
+					break;
+			}
+
+			if (chainBlock != nil)
+				chainBlock(error);
+		};
+
+	return block;
+}
+- (BOOL)addAuthorizationHeaderToSTHTTPRequest:(STHTTPRequest*)request
+{
+	switch (_authMethod)
+	{
+		case OBPAuthMethod_OAuth1:
+			[self addAuthorizationHeader1ToSTHTTPRequest: request];
+			break;
+		case OBPAuthMethod_DirectLogin:
+			[self addAuthorizationHeader2ToSTHTTPRequest: request];
+			break;
+		default:
+			return NO;
+			break;
+	}
+	return YES;
+}
+- (BOOL)addAuthorizationHeaderToURLRequest:(NSMutableURLRequest*)request
+{
+	switch (_authMethod)
+	{
+		case OBPAuthMethod_OAuth1:
+			[self addAuthorizationHeader1ToURLRequest: request];
+			break;
+		case OBPAuthMethod_DirectLogin:
+			[self addAuthorizationHeader2ToURLRequest: request];
+			break;
+		default:
+			return NO;
+			break;
+	}
+	return YES;
+}
+- (BOOL)authorizeSTHTTPRequest:(STHTTPRequest*)request
+{
+	OBP_ASSERT(self.state == OBPSessionStateValid);
+	if (self.state != OBPSessionStateValid)
+		return NO;
+
+	// If auth header installed, chain error handler to check if token has been revoked
+	if ([self addAuthorizationHeaderToSTHTTPRequest: request])
+		request.errorBlock = [self detectRevokeBlockWithChainToBlock: request.errorBlock];
+
+	return YES;
+}
+- (BOOL)authorizeURLRequest:(NSMutableURLRequest*)request andWrapErrorHandler:(HandleResultBlock*)handlerAt
+{
+	OBP_ASSERT(self.state == OBPSessionStateValid);
+	if (self.state != OBPSessionStateValid)
+		return NO;
+
+	// If auth header installed, chain error handler to check if token has been revoked
+	if ([self addAuthorizationHeaderToURLRequest: request])
+	if (handlerAt)
+	   *handlerAt = [self detectRevokeBlockWithChainToBlock: *handlerAt];
+
+	return YES;
+}
+@end
+
+
+
+#pragma mark -
+@implementation OBPSession (OAuth1)
+- (void)startValidating1
+{
+	// We keep a strong reference to the webViewProvider for the duration of our authentication process...
+	_WVProvider = _webViewProvider ?: [OBPDefaultWebViewProvider instance];
+	[self getAuthRequestToken];
+}
+#pragma mark -
+- (void)completedWith:(NSString*)token and:(NSString*)secret error:(NSError*)error // Vagueness of object message name is deliberate.
+{
+	[_WVProvider resetWebViewProvider];
+	_WVProvider = nil;
+	_callbackURLString = nil;
+	_requestToken = nil;
+	_requestTokenSecret = nil;
+	_verifier = nil;
+
+	OBPSessionState	newState;
+	if ([token length] && [secret length])
+		newState = OBPSessionStateValid;
+	else
+		newState = OBPSessionStateInvalid, token = secret = @"";
+
+	NSDictionary*	data = @{
+		OBPServerInfo_TokenKey		: token,
+		OBPServerInfo_TokenSecret	: secret,
+	};
+
+	[self endWithState: newState data: data error: error];
 }
 - (void)getAuthRequestToken
 {
@@ -361,38 +536,8 @@ static OBPSessionArray* sSessions = nil;
     [request startAsynchronous];
 }
 #pragma mark -
-- (HandleResultBlock)detectRevokeBlockWithChainToBlock:(HandleResultBlock)chainBlock
+- (void)addAuthorizationHeader1ToSTHTTPRequest:(STHTTPRequest*)request
 {
-	HandleResultBlock	block =
-		^(NSError* error)
-		{
-			switch (error.code)
-			{
-				case 401:
-					OBP_LOG(@"Request got 401 Unauthorized => Access to server %@ revoked", _serverInfo.name);
-					[self invalidate];
-					break;
-
-				case NSURLErrorUserAuthenticationRequired:
-					if (![error.domain isEqualToString: NSURLErrorDomain])
-						break;
-					OBP_LOG(@"Request got NSURLErrorUserAuthenticationRequired => Access to server %@ revoked", _serverInfo.name);
-					[self invalidate];
-					break;
-			}
-
-			if (chainBlock != nil)
-				chainBlock(error);
-		};
-
-	return block;
-}
-- (BOOL)authorizeSTHTTPRequest:(STHTTPRequest*)request
-{
-	OBP_ASSERT(_state == OBPSessionStateValid);
-	if (_state != OBPSessionStateValid)
-		return NO;
-
 	NSDictionary*			d = _serverInfo.accessData;
 	NSString*				consumerKey = d[OBPServerInfo_ClientKey];
 	NSString*				consumerSecret = d[OBPServerInfo_ClientSecret];
@@ -400,7 +545,7 @@ static OBPSessionArray* sSessions = nil;
 	NSString*				tokenSecret = d[OBPServerInfo_TokenSecret];
 	NSString*				header;
 
-	OBP_ASSERT(0 != [consumerKey length] * [consumerSecret length] * [tokenKey length] * [tokenSecret length]);
+	OBP_ASSERT(0 != [consumerKey length] * [consumerSecret length] * [tokenKey length] * [tokenSecret length] && ![DL_TOKEN_SECRET isEqualToString: tokenSecret]);
 	//	If STHTTPRequest's HTTPMethod property is not explicitly set, then STHTTPRequest infers it lazily at the last moment, and we can get a value from the property that is not yet accurate at this stage. Assert that this is not the case here:
 	OBP_ASSERT(([request.HTTPMethod isEqualToString: @"GET"] || [request.HTTPMethod isEqualToString: @"DELETE"]) == (request.POSTDictionary==nil && request.rawPOSTData==nil));
 
@@ -417,18 +562,9 @@ static OBPSessionArray* sSessions = nil;
 		OAuthCoreSignatureMethod_HMAC_SHA256);
 
     [request setHeaderWithName: @"Authorization" value: header];
-
-	// Chain error handler to detect if token has been revoked
-	request.errorBlock = [self detectRevokeBlockWithChainToBlock: request.errorBlock];
-
-	return YES;
 }
-- (BOOL)authorizeURLRequest:(NSMutableURLRequest*)request andWrapErrorHandler:(HandleResultBlock*)handlerAt
+- (void)addAuthorizationHeader1ToURLRequest:(NSMutableURLRequest*)request
 {
-	OBP_ASSERT(_state == OBPSessionStateValid);
-	if (_state != OBPSessionStateValid)
-		return NO;
-
 	NSDictionary*			d = _serverInfo.accessData;
 	NSString*				consumerKey = d[OBPServerInfo_ClientKey];
 	NSString*				consumerSecret = d[OBPServerInfo_ClientSecret];
@@ -436,7 +572,7 @@ static OBPSessionArray* sSessions = nil;
 	NSString*				tokenSecret = d[OBPServerInfo_TokenSecret];
 	NSString*				header;
 
-	OBP_ASSERT(0 != [consumerKey length] * [consumerSecret length] * [tokenKey length] * [tokenSecret length]);
+	OBP_ASSERT(0 != [consumerKey length] * [consumerSecret length] * [tokenKey length] * [tokenSecret length] && ![DL_TOKEN_SECRET isEqualToString: tokenSecret]);
 
 	header = OAuthHeader(
 		request.URL,
@@ -451,26 +587,200 @@ static OBPSessionArray* sSessions = nil;
 		OAuthCoreSignatureMethod_HMAC_SHA256);
 
     [request setValue: header forHTTPHeaderField: @"Authorization"];
-
-	// Chain error handler to check if token has been revoked
-	if (handlerAt)
-	   *handlerAt = [self detectRevokeBlockWithChainToBlock: *handlerAt];
-
-	return YES;
 }
+@end
+
+
+
 #pragma mark -
-- (void)setMarshal:(OBPMarshal*)marshal
+@implementation OBPSession (DirectLogin)
+- (void)startValidating2
 {
-	if (marshal && marshal.session != self)
-		marshal = nil;
-	if (_marshal != marshal)
-		_marshal = marshal;
+	ProvideDirectLoginParamsBlock	provider =
+		_directLoginParamsProvider
+		?:
+		^void(ReceiveDirectLoginParamsBlock receiver)
+		{
+			NSString*			title = @"Log In";
+			NSString*			message = [NSString stringWithFormat: @"Please enter your Username and Password to log in to\n%@", self.serverInfo.name];
+			NSString*			actionButtonTitle = @"Log In";
+			NSString*			cancelButtonTitle = @"Cancel";
+			NSString*			usernamePlaceholder = @"Username";
+			NSString*			passwordPlaceholder = @"Password";
+#if TARGET_OS_IPHONE
+			UIAlertController*	ac;
+			UIAlertAction*		aa;
+			ac = [UIAlertController alertControllerWithTitle: title message: message
+											  preferredStyle: UIAlertControllerStyleAlert];
+			[ac addTextFieldWithConfigurationHandler:^(UITextField* textField) {
+				textField.placeholder = usernamePlaceholder;
+			}];
+			[ac addTextFieldWithConfigurationHandler:^(UITextField* textField) {
+				textField.placeholder = passwordPlaceholder;
+				textField.secureTextEntry = YES;
+			}];
+			aa = [UIAlertAction actionWithTitle: cancelButtonTitle style: UIAlertActionStyleCancel
+										handler: ^(UIAlertAction*a) {
+					receiver(nil, nil);
+				}];
+			[ac addAction: aa];
+			aa = [UIAlertAction actionWithTitle: actionButtonTitle style: UIAlertActionStyleDefault
+										handler: ^(UIAlertAction* action) {
+					receiver(ac.textFields[0].text, ac.textFields[1].text);
+				}];
+			[ac addAction: aa];
+			UIWindow*			window = [UIApplication sharedApplication].keyWindow;
+			UIViewController*	vc = window.rootViewController; // walk down tree?
+			[vc presentViewController: ac animated: YES completion: nil];
+#else
+			enum {
+				tf_un=0, tf_pw, tf_count,
+				frame_un=tf_un, frame_pw=tf_pw, frame_av, frame_count,
+			};
+			NSTextField*		username;
+			NSTextField*		password;
+			NSTextField*		tf;
+			NSUInteger			i;
+			CGRect				frame[frame_count] = {{2,28,280,20},{2,0,280,20},{0,0,284,48}};
+			for (i = 0; i < tf_count; i++)
+			{
+				if (i == tf_un)
+					tf = username = [[NSTextField alloc] initWithFrame: frame[i]];
+				else
+					tf = password = [[NSSecureTextField alloc] initWithFrame: frame[i]];
+				tf.placeholderString = i == tf_un ? usernamePlaceholder : passwordPlaceholder;
+				tf.maximumNumberOfLines = 1;
+				tf.drawsBackground = YES; tf.bordered = YES; tf.editable = YES; tf.selectable = YES;
+			}
+			NSView*				accessoryView = [[NSView alloc] initWithFrame: frame[frame_av]];
+			[accessoryView addSubview: username];
+			[accessoryView addSubview: password];
+
+			NSAlert*			alert = [[NSAlert alloc] init];
+			alert.messageText = title;
+			alert.informativeText = message;
+			[alert addButtonWithTitle: actionButtonTitle];
+			[alert addButtonWithTitle: cancelButtonTitle];
+			alert.accessoryView = accessoryView;
+			[alert layout];
+
+			[alert beginSheetModalForWindow: NSApp.keyWindow
+						  completionHandler:
+				^(NSModalResponse returnCode) {
+					if (returnCode == NSAlertFirstButtonReturn)
+					{
+						receiver(username.stringValue, password.stringValue);
+					}
+				}
+			];
+#endif
+		};
+
+	ReceiveDirectLoginParamsBlock	receiver =
+		^void(NSString* username, NSString* password)
+		{
+			[self getAuthTokenWithParams: username : password];
+		};
+
+	provider(receiver);
 }
-- (OBPMarshal*)marshal
+- (void)getAuthTokenWithParams:(NSString*)username :(NSString*)password
 {
-	if (_marshal == nil)
-		_marshal = [[OBPMarshal alloc] initWithSessionAuth: self];
-	return _marshal;
+	if (![username length] || ![password length])
+	{
+		[self endWithState: OBPSessionStateInvalid
+					  data: nil
+					 error: [NSError errorWithDomain: NSCocoaErrorDomain code: NSUserCancelledError userInfo: nil]];
+		return;
+	}
+
+	NSDictionary*			d = _serverInfo.accessData;
+	NSString*				base = d[OBPServerInfo_AuthServerBase];
+	NSString*				path = @"/my/logins/direct";
+	NSString*				consumerKey = d[OBPServerInfo_ClientKey];
+	NSString*				header;
+    STHTTPRequest*			request;
+	STHTTPRequest __weak*	request_ifStillAround;
+
+	path = [base stringForURLByAppendingPath: path];
+	request_ifStillAround = request = [STHTTPRequest requestWithURLString: path];
+	request.HTTPMethod = @"POST";
+	request.POSTDictionary = @{};
+
+	header = [NSString stringWithFormat: @"DirectLogin username=\"%@\", password=\"%@\", consumer_key=\"%@\"", username, password, consumerKey];
+    [request setHeaderWithName: @"Authorization" value: header];
+
+    request.completionBlock =
+		^(NSDictionary *headers, NSString *body)
+		{
+			STHTTPRequest*	request = request_ifStillAround;
+			NSInteger		status = request.responseStatus;
+			NSDictionary*	response;
+			NSString*		token;
+			BOOL			completedStage = NO;
+			NSError*		error = nil;
+
+			if (status == 200)
+			{
+				response = [NSJSONSerialization JSONObjectWithData: [body dataUsingEncoding: NSUTF8StringEncoding] options: 0 error: &error];
+				token = response[@"token"];
+				if ([token length])
+				{
+					[self endWithState: OBPSessionStateValid
+								  data: @{	OBPServerInfo_TokenKey : token,
+											OBPServerInfo_TokenSecret : DL_TOKEN_SECRET}
+								 error: nil];
+					completedStage = YES;
+				}
+			}
+
+			if (!completedStage)
+			{
+				OBP_LOG(@"getAuthToken request completion not successful: status=%d headers=%@ body=%@", (int)status, headers, body);
+				[self endWithState: OBPSessionStateInvalid
+							  data: @{OBPServerInfo_TokenKey : @"", OBPServerInfo_TokenSecret : @""}
+							 error: [NSError errorWithDomain: OBPSessionErrorDomain code: OBPSessionErrorCompletionUnsuccessful userInfo: @{@"status":@(status), NSURLErrorKey:request?request.url:[NSNull null]}]];
+			}
+		};
+
+    request.errorBlock =
+		^(NSError *error)
+		{
+			OBP_LOG(@"getAuthToken got error %@", error);
+			[self endWithState: OBPSessionStateInvalid
+						  data: @{OBPServerInfo_TokenKey : @"", OBPServerInfo_TokenSecret : @""}
+						 error: [NSError errorWithDomain: OBPSessionErrorDomain code: OBPSessionErrorCompletionError userInfo: @{NSUnderlyingErrorKey:error,NSURLErrorKey:request_ifStillAround.url?:[NSNull null]}]];
+		};
+    
+	_state = OBPSessionStateValidating;
+    [request startAsynchronous];
+	self.valid = _state == OBPSessionStateValid;
+}
+- (void)addAuthorizationHeader2ToSTHTTPRequest:(STHTTPRequest*)request
+{
+	NSDictionary*			d = _serverInfo.accessData;
+	NSString*				tokenKey = d[OBPServerInfo_TokenKey];
+	NSString*				tokenSecret = d[OBPServerInfo_TokenSecret];
+	NSString*				header;
+
+	OBP_ASSERT([tokenKey length] * [DL_TOKEN_SECRET isEqualToString: tokenSecret]);
+
+	header = [NSString stringWithFormat: @"DirectLogin token=\"%@\"", tokenKey];
+
+    [request setHeaderWithName: @"Authorization" value: header];
+}
+- (void)addAuthorizationHeader2ToURLRequest:(NSMutableURLRequest*)request
+{
+	NSDictionary*			d = _serverInfo.accessData;
+	NSString*				tokenKey = d[OBPServerInfo_TokenKey];
+	NSString*				tokenSecret = d[OBPServerInfo_TokenSecret];
+	NSString*				header;
+
+	OBP_ASSERT([tokenKey length] * [DL_TOKEN_SECRET isEqualToString: tokenSecret]);
+
+	header = [NSString stringWithFormat: @"DirectLogin token=\"%@\"", tokenKey];
+
+    [request setValue: header forHTTPHeaderField: @"Authorization"];
 }
 @end
 
