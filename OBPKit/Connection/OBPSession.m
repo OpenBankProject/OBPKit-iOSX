@@ -55,6 +55,17 @@ static OBPSessionArray* sSessions = nil;
 {
 	return [sSessions firstObject];
 }
++ (void)setCurrentSession:(OBPSession*)session
+{
+	NSUInteger index = session ? [sSessions indexOfObjectIdenticalTo: session] : NSNotFound;
+	OBP_LOG_IF(index == NSNotFound, @"[OBPSession setCurrentSession: %@] — bad parameter.", session);
+	if (index == NSNotFound || index == 0)
+		return;
+	NSMutableArray<OBPSession*>* ma = [sSessions mutableCopy];
+	[ma removeObjectIdenticalTo: session];
+	[ma insertObject: session atIndex: 0];
+	sSessions = [ma copy];
+}
 + (nullable instancetype)findSessionWithServerInfo:(OBPServerInfo*)serverInfo
 {
 	OBPSession* session;

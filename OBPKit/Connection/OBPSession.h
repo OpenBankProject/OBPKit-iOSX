@@ -65,6 +65,7 @@ Each instance holds an OBPMarshal helper object in its marshal property, for ret
 + (nullable OBPSession*)findSessionWithServerInfo:(OBPServerInfo*)serverInfo; ///< Return the OBPSession instance that uses the supplied OBPServerInfo instance, or nil if not found.
 + (void)removeSession:(OBPSession*)session; ///< Remove the supplied instance from the class' record of all sessions.
 + (nullable OBPSession*)currentSession; ///< Return the first session instance. (Convenience for when working with a single session at a time.)
++ (void)setCurrentSession:(OBPSession*)session; ///< Set session to be the current session. (Moves existing session to front of all sessions.)
 + (OBPSessionArray*)allSessions; ///< Return the list of session instances currently held by the class.
 
 // Instance set up
