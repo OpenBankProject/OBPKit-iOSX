@@ -26,6 +26,7 @@ FOUNDATION_EXPORT const unsigned char OBPKit_OSXVersionString[];
 #import <OBPKit/OBPSession.h>
 #import <OBPKit/OBPWebViewProvider.h>
 #import <OBPKit/OBPMarshal.h>
+#import <OBPKit/OBPDateFormatter.h>
 #import <OBPKit/OBPLogging.h>
 #import <OBPKit/NSString+OBPKit.h>
 

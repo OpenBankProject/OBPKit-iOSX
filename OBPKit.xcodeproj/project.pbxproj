@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AE15C5121D074DD6004ED657 /* OBPDateFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = AE15C5101D074DD6004ED657 /* OBPDateFormatter.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		AE15C5131D074DD6004ED657 /* OBPDateFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = AE15C5111D074DD6004ED657 /* OBPDateFormatter.m */; };
 		AE2B7A131CB43A390028B03E /* OAuthCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE2B7A111CB43A390028B03E /* OAuthCore.framework */; };
 		AE2B7A141CB43A390028B03E /* STHTTPRequest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE2B7A121CB43A390028B03E /* STHTTPRequest.framework */; };
 		AE2B7A171CB43A600028B03E /* OAuthCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE2B7A151CB43A600028B03E /* OAuthCore.framework */; };
@@ -38,6 +40,8 @@
 		AE3BC09A1C7F6962001A1AE1 /* OBPKit.h in Headers */ = {isa = PBXBuildFile; fileRef = AE3BC0971C7F6962001A1AE1 /* OBPKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AE3BC09B1C7F6962001A1AE1 /* OBPKit.h in Headers */ = {isa = PBXBuildFile; fileRef = AE3BC0971C7F6962001A1AE1 /* OBPKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AE8099F21C9AFEA0003C7D4F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AE8099F11C9AFEA0003C7D4F /* main.m */; };
+		AE883F941D08A75F00EC2DA4 /* OBPDateFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = AE15C5111D074DD6004ED657 /* OBPDateFormatter.m */; };
+		AE883F951D08A76500EC2DA4 /* OBPDateFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = AE15C5101D074DD6004ED657 /* OBPDateFormatter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AEA6FF451C98610F005C3A8B /* OBPServerInfoStore.h in Headers */ = {isa = PBXBuildFile; fileRef = AEA6FF431C98610F005C3A8B /* OBPServerInfoStore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AEA6FF461C98610F005C3A8B /* OBPServerInfoStore.h in Headers */ = {isa = PBXBuildFile; fileRef = AEA6FF431C98610F005C3A8B /* OBPServerInfoStore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AEA6FF471C986110005C3A8B /* OBPServerInfoStore.m in Sources */ = {isa = PBXBuildFile; fileRef = AEA6FF441C98610F005C3A8B /* OBPServerInfoStore.m */; };
@@ -61,6 +65,8 @@
 		AE1264A31C8849DA00AE0B00 /* OBPKit-iOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "OBPKit-iOS.xcconfig"; sourceTree = "<group>"; };
 		AE1264A61C884B0A00AE0B00 /* FrameworkCommon.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = FrameworkCommon.xcconfig; sourceTree = "<group>"; };
 		AE1264A71C884B4100AE0B00 /* OBPKit-OSX.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "OBPKit-OSX.xcconfig"; sourceTree = "<group>"; };
+		AE15C5101D074DD6004ED657 /* OBPDateFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBPDateFormatter.h; sourceTree = "<group>"; };
+		AE15C5111D074DD6004ED657 /* OBPDateFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OBPDateFormatter.m; sourceTree = "<group>"; };
 		AE2820321CC10C0500BC0AAC /* Cartfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Cartfile; sourceTree = "<group>"; };
 		AE2820331CC10C0500BC0AAC /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		AE2820341CC10C0500BC0AAC /* OBPKit.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = OBPKit.podspec; sourceTree = "<group>"; };
@@ -185,6 +191,8 @@
 			children = (
 				AE3BC07C1C7F6862001A1AE1 /* NSString+OBPKit.h */,
 				AE3BC07D1C7F6862001A1AE1 /* NSString+OBPKit.m */,
+				AE15C5101D074DD6004ED657 /* OBPDateFormatter.h */,
+				AE15C5111D074DD6004ED657 /* OBPDateFormatter.m */,
 				AE3BC07E1C7F6862001A1AE1 /* OBPLogging.h */,
 			);
 			path = Util;
@@ -250,6 +258,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AE3BC09A1C7F6962001A1AE1 /* OBPKit.h in Headers */,
+				AE15C5121D074DD6004ED657 /* OBPDateFormatter.h in Headers */,
 				AE3BC0871C7F6862001A1AE1 /* OBPWebViewProvider.h in Headers */,
 				AE3BC0931C7F6862001A1AE1 /* OBPLogging.h in Headers */,
 				AE3BC0831C7F6862001A1AE1 /* OBPSession.h in Headers */,
@@ -265,6 +274,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AE3BC0901C7F6862001A1AE1 /* NSString+OBPKit.h in Headers */,
+				AE883F951D08A76500EC2DA4 /* OBPDateFormatter.h in Headers */,
 				AE3BC0941C7F6862001A1AE1 /* OBPLogging.h in Headers */,
 				AE3BC0881C7F6862001A1AE1 /* OBPWebViewProvider.h in Headers */,
 				AE3BC0801C7F6862001A1AE1 /* OBPServerInfo.h in Headers */,
@@ -437,6 +447,7 @@
 				AE3BC0851C7F6862001A1AE1 /* OBPSession.m in Sources */,
 				AE3BC0891C7F6862001A1AE1 /* OBPWebViewProvider.m in Sources */,
 				AE3BC08D1C7F6862001A1AE1 /* OBPMarshal.m in Sources */,
+				AE15C5131D074DD6004ED657 /* OBPDateFormatter.m in Sources */,
 				AE3BC0911C7F6862001A1AE1 /* NSString+OBPKit.m in Sources */,
 				AEA6FF471C986110005C3A8B /* OBPServerInfoStore.m in Sources */,
 			);
@@ -450,6 +461,7 @@
 				AE3BC0861C7F6862001A1AE1 /* OBPSession.m in Sources */,
 				AE3BC08A1C7F6862001A1AE1 /* OBPWebViewProvider.m in Sources */,
 				AE3BC08E1C7F6862001A1AE1 /* OBPMarshal.m in Sources */,
+				AE883F941D08A75F00EC2DA4 /* OBPDateFormatter.m in Sources */,
 				AE3BC0921C7F6862001A1AE1 /* NSString+OBPKit.m in Sources */,
 				AEA6FF481C986110005C3A8B /* OBPServerInfoStore.m in Sources */,
 			);
