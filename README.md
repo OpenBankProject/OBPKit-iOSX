@@ -3,13 +3,30 @@
 TESOBE Ltd.
 
 
+1.	[Overview](#overview)
+1.	[Installation](#installation)
+	1.	[Installation with Carthage](#installation-with-carthage)
+	1.	[Installation with CocoaPods](#installation-with-cocoapods)
+1.	[Classes](#classes)
+	1.	[OBPServerInfo](#obpserverinfo)
+	1.	[OBPSession](#obpsession)
+	1.	[OBPWebViewProvider](#obpwebviewprovider)
+	1.	[OBPMarshal](#obpmarshal)
+	1.	[OBPDateFormatter](#obpdateformatter)
+1.	[How to Use](#how-to-use)
+1.	[Customising OBPMarshal Behaviour](#customising-obpmarshal-behaviour)
+
+
+
 ### Overview
 
 OBPKit allows you to easily connect your existing iOS and OSX apps to servers offering the [Open Bank Project API][API].
 
-It takes care of the authorisation process, and once the user has given your app to access his/her resources, it provides you with a helper to marshal resources through the API, or if you want to roll your own, it can add authorisation headers to requests you form yourself.
+It takes care of the authorisation process, and once the user has given your app to access his/her resources, it provides you with a helper to marshal resources through the API, or if you want to roll your own, you can use OBPKit to add authorisation headers to the requests you form yourself.
 
 You can look at the [HelloOBP-iOS][] and [HelloOBP-Mac][] sample applications to see OBPKit in use.
+
+
 
 ### Installation
 
@@ -17,7 +34,7 @@ You can use either [Carthage][] or [CocoaPods][] ([more](https://cocoapods.org/a
 
 #### Installation with Carthage
 
-1.	[Install the lastest Carthage][Carthage-install] — in a nutshell: install [homebrew](http://brew.sh), run `brew update` and run `brew install carthage`.
+1.	[Install the latest Carthage][Carthage-install] — in a nutshell: install [homebrew](http://brew.sh), run `brew update` and run `brew install carthage`.
 
 1.	If you don't already have one, create a file named `Cartfile` at the root level of your project folder. To your Cartfile add...
 
@@ -33,7 +50,7 @@ You can use either [Carthage][] or [CocoaPods][] ([more](https://cocoapods.org/a
 
 #### Installation with CocoaPods
 
-1.	[Install the lastest CocoaPods][CocoaPods-install]
+1.	[Install the latest CocoaPods][CocoaPods-install]
 
 1.	If you already have a Podfile, add…
 
@@ -63,33 +80,47 @@ You can use either [Carthage][] or [CocoaPods][] ([more](https://cocoapods.org/a
 
 ### Classes
 
-There are three classes to use and one protocol to adopt.
+There are three main classes to use, one protocol to adopt and some helpers.
 
 #### OBPServerInfo
 
 An `OBPServerInfo` instance records the data necessary to access an OBP server. It stores sensitive credentials securely in the key chain.
 
-The `OBPServerInfo` class keeps a persistant record of all complete instances. An instance is complete once its client key and secret have been set. You can typically obtain these for your app from https://host-serving-OBP-API/consumer-registration.
+The `OBPServerInfo` class keeps a persistent record of all complete instances. An instance is complete once its client key and secret have been set. You can typically obtain these for your app from https://host-serving-OBP-API/consumer-registration.
 
-You can use the `OBPServerInfo` class to keep a record of all the OBP servers for which you support a connection; mostly you will just have one, but more are possible. `OBPServerInfo` instances are reloaded automatically when your app is launched.
+You can use the `OBPServerInfo` class to keep a record of all the OBP servers for which you support a connection; usually you will just have one, but more are possible. `OBPServerInfo` instances are reloaded automatically when your app is launched.
 
 A default instance of the helper class `OBPServerInfoStorage` handles the actual save and restore. You can customise your storage approach by nominating that your override class be used. You can configure this, as well as other security details, by passing a dictionary of customisation options to the function `OBPServerInfoCustomise` before the `OBPServerInfo` class initialize has been called.
 
 #### OBPSession
 
-You request an `OBPSession` instance for the OBP server you want to connect to, and use it to handle the authorisation sequence, and once access is gained, use the session's marshall object to help you marshal resources through the API.
+You request an `OBPSession` instance for the OBP server you want to connect to, and use it to handle the authorisation sequence, and once access is gained, use the session's marshall object to help you marshal resources through the API. 
+
+By default, `OBPSession` uses OAuth for authorisation, which is the correct way for your app to gain your user's permission to access his/her resources, and OBPKit makes this very easy to use. However, during initial development, you can also set the `authMethod` of your instance to use [Direct Login][DirectLogin] if you wish. (You can also set the `authMethod` to none in order to restrict access to just the public resources on an OBP server; or do this as needed for individual calls to OBPMarshall.) 
 
 The `OBPSession` class keeps track of the instances that are currently alive, and will create or retrieve an `OBPSession` instance for an `OBPServerInfo` instance identifying a server you want to talk to. Both `OBPServerInfo` and `OBPSession` allow you to access default instances for when you only want to deal with singletons.
 
 #### OBPWebViewProvider
 
-`OBPSession` needs some part of your app to act as an `OBPWebViewProvider` protocol adopter in order to show the user a web page when it is time to get authorisation to access his/her resources.
+For OAuth, `OBPSession` needs some part of your app to act as an `OBPWebViewProvider` protocol adopter in order to show the user a web page when it is time to get authorisation to access his/her resources.
 
-If you don't provide an `OBPWebViewProvider` protocol adopter, then the `OBPDefaultWebViewProvider` class singleton will be used. It provides basic support, and you can choose whether an in-app or external web view is brought up by calling configuring with the class member `+configureToUseExternalWebViewer:withCallbackSchemeName:andInstallCallbackHook:`. There are advantages and disadvantages to both, as set out in the Xcode quick help for the class. 
+If you don't provide an `OBPWebViewProvider` protocol adopter, then the `OBPDefaultWebViewProvider` class singleton will be used. It provides basic support, and you can choose whether an in-app or external web view is brought up by calling configuring with the class member `+configureToUseExternalWebViewer:withCallbackSchemeName:andInstallCallbackHook:`. There are advantages and disadvantages to both, as set out in the Xcode quick help for the class.
 
 #### OBPMarshal
 
-A default `OBPMarshal` instance is available from your `OBPSession` object, and will take care of fetching resources from the API direct to your completion blocks.
+A default `OBPMarshal` instance is available from your `OBPSession` object, and will take care of creating, fetching, updating and deleting resources from the API, with response data and corresponding deserialised object delivered to your completion blocks. You can easily override the default behaviour by invoking a range of options. You can also supply extra headers via the options to, for example, limit by ordinal or date the range of transactions you retrieve. 
+
+| REST API Verb | OBPMarshal Call |
+| --- | --- |
+| GET | `-getResourceAtAPIPath:withOptions:forResultHandler:orErrorHandler:` |
+| POST | `-createResource:atAPIPath:withOptions:forResultHandler:orErrorHandler:` |
+| PUT | `-updateResource:atAPIPath:withOptions:forResultHandler:orErrorHandler:` |
+| DELETE | `-deleteResourceAtAPIPath:withOptions:forResultHandler:orErrorHandler:` |
+
+#### OBPDateFormatter
+
+You can use the `OBPDateFormatter` helper to convert back and forth between `NSDate` instances and the string representation used when sending and recieving OBP API resources.
+
 
 
 ### How to Use
@@ -110,7 +141,7 @@ if (nil == [OBPServerInfo firstEntryForAPIServer: kDefaultServer_APIBase])
 Here the details of the default server are fetched from a simple header (DefaultServerDetails.h), which is insecure, but in production, you might want to give the API keys some stronger protection. While getting up and running, this kind of thing is sufficient:
 
 ```objc
-static NSString* const kDefaultServer_APIBase = @"https://apisandbox.openbankproject.com/obp/v1.3/";
+static NSString* const kDefaultServer_APIBase = @"https://apisandbox.openbankproject.com/obp/v2.0.0/";
 NS_INLINE NSDictionary* DefaultServerDetails() {
 	return @{
 		OBPServerInfo_APIBase			: kDefaultServer_APIBase,
@@ -138,41 +169,55 @@ When the user requests to log in, ask the default session instance to validate, 
 {
 	...
 
-	_session = [OBPSession currentSession];
-
 	// Kick off session authentication
-	[_session validate:
+	[[OBPSession currentSession] validate:
 		^(NSError* error)
 		{
 			if (error == nil) // success, do stuff...
 				[self fetchAccounts];
-			// if this is a log-in view, then we're done with log-in now...
-			[self.navigationController popToRootViewControllerAnimated:YES];
 		}
 	];
 }
 ```
 
-After this, you can use the marshal property of current session instance to retrieve resources from the API:
+After this, you can use the marshal property of the current session instance to retrieve resources from the API:
 
 ```objc
-NSString* requestPath = [NSString stringWithFormat: @"banks/%@/accounts/private", bankID];
-[_session.marshal getResourceAtAPIPath: requestPath
-							 withOptions: @{OBPMarshalOptionExpectClass : [NSDictionary class]}
-							forHandler:
-	^(id deserializedJSONObject, NSString* responseBody) {
-		_accountsDict = deserializedJSONObject;
-		dispatch_async(dispatch_get_main_queue(), ^{
-			[self loadAccounts];
-		});
-	}
-];
+OBPMarshal*				marshal = [OBPSession currentSession].marshal;
+NSString*				path = [NSString stringWithFormat: @"banks/%@/accounts/private", bankID];
+HandleOBPMarshalData	responseHandler = 
+	^(id deserializedObject, NSString* responseBody)
+	{
+		_accountsDict = deserializedObject;
+		[self loadAccounts];
+	};
+
+[marshal getResourceAtAPIPath: path
+				  withOptions: nil
+		   forResponseHandler: responseHandler
+			   orErrorHandler: nil]; // nil ==> use default error handler
 ```
+
+### Customising OBPMarshal Behaviour
+
+Most of the time, the default behaviour of `OBPMarshal` is what you will want, but for special situations you can easily override the default `OBPMarshal` behaviour by passing an options dictionary in with your calls:
+
+| To… | add the key… | with value… |
+| :--- | :--- | :--- |
+| …access only public resources | `OBPMarshalOptionOnlyPublicResources` | `@YES` |
+| …add extra headers | `OBPMarshalOptionExtraHeaders` | `@{ @"obp_limit" : @(chunkSize), @"obp_offset" : @(nextChunkOffset) }` (…for example) |
+| …expect a response body that isn't JSON | `OBPMarshalOptionDeserializeJSON` | `@NO` |
+| …expect a JSON container object that is not a dictionary | `OBPMarshalOptionExpectClass` | `[NSArray class]` (…for example) |
+| …expect a JSON container object that could be any class | `OBPMarshalOptionExpectClass` | `[NSNull null]` |
+| …expect a non-default HTTP status code | `OBPMarshalOptionExpectStatus` | `@201` |
+| …accept several HTTP status codes | `OBPMarshalOptionExpectStatus` | `@[@201, @212]` |
+| …send a form instead of JSON | `OBPMarshalOptionSendDictAsForm` | `@YES` |
 
 
 
 [OBP]: http://www.openbankproject.com
 [API]: https://github.com/OpenBankProject/OBP-API/wiki
+[DirectLogin]: https://github.com/OpenBankProject/OBP-API/wiki/Direct-Login
 [HelloOBP-iOS]: https://github.com/OpenBankProject/Hello-OBP-OAuth1.0a-IOS
 [HelloOBP-Mac]: https://github.com/OpenBankProject/Hello-OBP-OAuth1.0a-Mac
 [Carthage]: https://github.com/Carthage/Carthage/blob/master/README.md
