@@ -14,7 +14,7 @@
 
 
 @implementation NSString (OBPKit)
-- (NSString*)stringByAppendingURLQueryParams:(NSDictionary*)dictionary
+- (NSString*)stringByAddingPercentEncodingForAllRFC3986ReservedCharachters
 {
 	static NSCharacterSet* sAllowedSet = nil;
 	static dispatch_once_t onceToken;
@@ -23,6 +23,10 @@
 			@"-._~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"];
 			// ...the Unreserved Characters in RFC 3986, Section 2.3. (Unfortunately the NSURLUtilities category on NSCharacterSet provides allowed sets for Host, User, Password, Path, Query and Fragment, but not the Unreserved set.)
 	});
+	return [self stringByAddingPercentEncodingWithAllowedCharacters: sAllowedSet];
+}
+- (NSString*)stringByAppendingURLQueryParams:(NSDictionary*)dictionary
+{
     NSMutableString*	str = [self mutableCopy];
 	const char*			sep = [str rangeOfString:@"?"].length ? "&" : "?";
     
@@ -30,8 +34,8 @@
 	{
         NSString *keyString = [key description];
         NSString *valString = [dictionary[key] description];
-		keyString = [keyString stringByAddingPercentEncodingWithAllowedCharacters: sAllowedSet];
-		valString = [valString stringByAddingPercentEncodingWithAllowedCharacters: sAllowedSet];
+		keyString = [keyString stringByAddingPercentEncodingForAllRFC3986ReservedCharachters];
+		valString = [valString stringByAddingPercentEncodingForAllRFC3986ReservedCharachters];
 		[str appendFormat: @"%s%@=%@", sep, keyString, valString];
 		sep = "&";
     }

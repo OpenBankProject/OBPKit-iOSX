@@ -11,6 +11,7 @@
 
 
 @interface NSString (OBPKit)
+- (NSString*)stringByAddingPercentEncodingForAllRFC3986ReservedCharachters;
 - (NSString*)stringByAppendingURLQueryParams:(NSDictionary*)dictionary;
 - (NSDictionary*)extractURLQueryParams;
 - (NSString*)stringForURLByAppendingPath:(NSString*)path;
