@@ -101,7 +101,7 @@ static OBPSessionArray* sSessions = nil;
 	{
 		self.webViewProvider = wvp;
 		_serverInfo = serverInfo;
-		NSDictionary* d = _serverInfo.data;
+		NSDictionary* d = _serverInfo.accessData;
 		if (0 != [d[OBPServerInfo_TokenKey] length] * [d[OBPServerInfo_TokenSecret] length])
 			_valid = YES, _state = OBPSessionStateValid;
 	}
@@ -144,7 +144,7 @@ static OBPSessionArray* sSessions = nil;
 	BOOL	validWas = _valid;
 	BOOL	validNow = _state == OBPSessionStateValid;
 
-	_serverInfo.data = @{
+	_serverInfo.accessData = @{
 		OBPServerInfo_TokenKey		: token,
 		OBPServerInfo_TokenSecret	: secret,
 	};
@@ -164,7 +164,7 @@ static OBPSessionArray* sSessions = nil;
 }
 - (void)getAuthRequestToken
 {
-	NSDictionary*			d = _serverInfo.data;
+	NSDictionary*			d = _serverInfo.accessData;
 	NSString*				base = d[OBPServerInfo_AuthServerBase];
 	NSString*				path = d[OBPServerInfo_RequestPath];
 	NSString*				consumerKey = d[OBPServerInfo_ClientKey];
@@ -241,7 +241,7 @@ static OBPSessionArray* sSessions = nil;
 }
 - (void)getUsersAuthorisation
 {
-	NSDictionary*			d = _serverInfo.data;
+	NSDictionary*			d = _serverInfo.accessData;
 	NSString*				base = d[OBPServerInfo_AuthServerBase];
 	NSString*				path = d[OBPServerInfo_GetUserAuthPath];
 	NSURLComponents*		baseComponents = [NSURLComponents componentsWithString: base];
@@ -285,7 +285,7 @@ static OBPSessionArray* sSessions = nil;
 }
 - (void)getAccessToken
 {
-	NSDictionary*			d = _serverInfo.data;
+	NSDictionary*			d = _serverInfo.accessData;
 	NSString*				base = d[OBPServerInfo_AuthServerBase];
 	NSString*				path = d[OBPServerInfo_GetTokenPath];
 	NSString*				consumerKey = d[OBPServerInfo_ClientKey];
@@ -382,7 +382,7 @@ static OBPSessionArray* sSessions = nil;
 	if (_state != OBPSessionStateValid)
 		return NO;
 
-	NSDictionary*			d = _serverInfo.data;
+	NSDictionary*			d = _serverInfo.accessData;
 	NSString*				consumerKey = d[OBPServerInfo_ClientKey];
 	NSString*				consumerSecret = d[OBPServerInfo_ClientSecret];
 	NSString*				tokenKey = d[OBPServerInfo_TokenKey];
@@ -418,7 +418,7 @@ static OBPSessionArray* sSessions = nil;
 	if (_state != OBPSessionStateValid)
 		return NO;
 
-	NSDictionary*			d = _serverInfo.data;
+	NSDictionary*			d = _serverInfo.accessData;
 	NSString*				consumerKey = d[OBPServerInfo_ClientKey];
 	NSString*				consumerSecret = d[OBPServerInfo_ClientSecret];
 	NSString*				tokenKey = d[OBPServerInfo_TokenKey];

@@ -54,8 +54,9 @@ The class keeps a persistent record of all complete instances. An instance is co
 @property (nonatomic, strong, readonly) NSString* APIServer; ///< url string for the API server
 @property (nonatomic, strong, readonly) NSString* APIVersion; ///< string for the version of the API to use
 @property (nonatomic, strong, readonly) NSString* APIBase; ///< base url for API calls, formed using the APIServer and APIVersion properties
-@property (nonatomic, copy) NSDictionary* data; ///< Get/set access data. \note When getting data, the returned dictionary contains values for all the OBPServerInfo_<xxx> keys defined in OBPServerInfo.h, with derived and default values filled in as necessary. \note When setting data, only the values for the OBPServerInfo_<xxx> keys defined in OBPServerInfo.h are copied, while other values held are left unchanged. \note The API host is never changed after the instance has been created, regardless of values passed in for the keys OBPServerInfo_APIServer and OBPServerInfo_APIBase, and the client key and secret are not changeable once set.
-@property (readonly) BOOL usable; ///< returns YES when entry has credentials to request access (client key & secret).
+@property (nonatomic, copy) NSDictionary* accessData; ///< Get/set access data. \note When getting data, the returned dictionary contains values for _all_ the OBPServerInfo_<xxx> keys defined in OBPServerInfo.h, with derived and default values filled in as necessary. \note When setting data, _only_ the values for the OBPServerInfo_<xxx> keys defined in OBPServerInfo.h are copied, while other values held are left unchanged. \note The API host is never changed after the instance has been created, regardless of values passed in for the keys OBPServerInfo_APIServer and OBPServerInfo_APIBase, and the client key and secret are not changeable once set.
+@property (nonatomic, copy) NSDictionary* appData; ///< Get/set general data associated with this server for use by the host app. Persisted. Contents must conform to NSSecureCoding.
+@property (readonly) BOOL usable; ///< returns YES when entry has credentials to request access (client key and secret).
 @property (readonly) BOOL inUse; ///< returns YES when entry has credentials to access user's data (token key and secret).
 @end
 /*

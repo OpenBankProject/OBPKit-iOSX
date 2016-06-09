@@ -206,6 +206,7 @@ OBPClientCredentialCryptBlock
 	NSString*		_APIBase;
 	NSDictionary*	_AuthServerDict;
 	NSDictionary*	_cache;
+	NSDictionary*	_appData;
 
 	BOOL			_usable;
 	BOOL			_inUse;
@@ -355,6 +356,8 @@ OBPClientCredentialCryptBlock
 }
 + (nullable OBPServerInfo*)firstEntryForAPIServer:(NSString*)APIServer
 {
+	if (![APIServer length])
+		return nil;
 	OBPServerInfo*		entry;
 	NSURLComponents*	components;
 	NSString*			matchVersion;
@@ -434,6 +437,8 @@ OBPClientCredentialCryptBlock
 	_APIVersion = [aDecoder decodeObjectOfClass: classNSString forKey: @"APIVersion"];
 	_APIBase = [aDecoder decodeObjectOfClass: classNSString forKey: @"APIBase"];
 	_AuthServerDict = [aDecoder decodeObjectOfClass: [NSDictionary class] forKey: @"AuthServerDict"];
+	if ([aDecoder containsValueForKey: @"appData"])
+		_appData = [aDecoder decodeObjectOfClass: [NSDictionary class] forKey: @"appData"];
 	return self;
 }
 - (void)encodeWithCoder:(NSCoder *)aCoder
@@ -444,6 +449,8 @@ OBPClientCredentialCryptBlock
 	[aCoder encodeObject: _APIVersion forKey: @"APIVersion"];
 	[aCoder encodeObject: _APIBase forKey: @"APIBase"];
 	[aCoder encodeObject: _AuthServerDict forKey: @"AuthServerDict"];
+	if (_appData)
+		[aCoder encodeObject: _appData forKey: @"appData"];
 }
 - (void)save
 {
@@ -517,7 +524,7 @@ OBPClientCredentialCryptBlock
 		_inUse = nil != value;
 }
 #pragma mark -
-- (void)setData:(NSDictionary*)data
+- (void)setAccessData:(NSDictionary*)data
 {
 	if (nil == data)
 		return;
@@ -593,7 +600,7 @@ OBPClientCredentialCryptBlock
 	if (changed)
 		[self save];
 }
-- (NSDictionary*)data
+- (NSDictionary*)accessData
 {
 	// load data from key chain and return (never store; we only store retrieval params)
 	NSMutableDictionary*	md = [NSMutableDictionary dictionary];
@@ -615,6 +622,18 @@ OBPClientCredentialCryptBlock
 	_usable = [md[OBPServerInfo_ClientKey] length] && [md[OBPServerInfo_ClientSecret] length];
 	_inUse = [md[OBPServerInfo_TokenKey] length] && [md[OBPServerInfo_TokenSecret] length];
 	return _usable;
+}
+#pragma mark -
+- (void)setAppData:(NSDictionary*)appData
+{
+	if (appData ? [_appData isEqualToDictionary: appData] : !_appData)
+		return;
+	_appData = [appData copy];
+	[self save];
+}
+- (NSDictionary*)appData
+{
+	return _appData;
 }
 #pragma mark -
 - (void)setName:(NSString*)name
