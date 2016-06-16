@@ -290,8 +290,8 @@ static OBPSessionArray* sSessions = nil;
 }
 - (BOOL)authorizeSTHTTPRequest:(STHTTPRequest*)request
 {
-	OBP_ASSERT(self.state == OBPSessionStateValid);
-	if (self.state != OBPSessionStateValid)
+	OBP_ASSERT(self.state == OBPSessionStateValid || self.authMethod == OBPAuthMethod_None);
+	if (self.state != OBPSessionStateValid && self.authMethod != OBPAuthMethod_None)
 		return NO;
 
 	// If auth header installed, chain error handler to check if token has been revoked
@@ -302,8 +302,8 @@ static OBPSessionArray* sSessions = nil;
 }
 - (BOOL)authorizeURLRequest:(NSMutableURLRequest*)request andWrapErrorHandler:(HandleResultBlock*)handlerAt
 {
-	OBP_ASSERT(self.state == OBPSessionStateValid);
-	if (self.state != OBPSessionStateValid)
+	OBP_ASSERT(self.state == OBPSessionStateValid || self.authMethod == OBPAuthMethod_None);
+	if (self.state != OBPSessionStateValid && self.authMethod != OBPAuthMethod_None)
 		return NO;
 
 	// If auth header installed, chain error handler to check if token has been revoked
