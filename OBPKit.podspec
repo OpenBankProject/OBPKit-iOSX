@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "OBPKit"
-  s.version = "1.1.0"
+  s.version = "1.1.1"
   s.summary = "Ease access to servers offering the Open Bank Project API."
   s.description = "OBPKit is quick to integrate into your iOS app or OSX application, and makes authorisation of sessions and marshalling of resources through the Open Bank Project API simple and easy."
   s.homepage = "https://github.com/OpenBankProject/OBPKit-iOSX"
@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.osx.deployment_target = "10.9"
   s.source = { :git => "https://github.com/OpenBankProject/OBPKit-iOSX.git", :tag => s.version }
   s.source_files  = "OBPKit/**/*.{h,m}", "Framework", "GenerateKey"
-  s.public_header_files = "OBPKit/**/*.h", "Framework/*.h"
+  s.public_header_files = "OBPKit/Connection/*.h", "OBPKit/Marshal/*.h", "OBPKit/Util/OBP*.h", "OBPKit/Util/NS*.h", "Framework/*.h"
   s.preserve_paths = "Config/*.xcconfig"
   s.requires_arc = true
   s.dependency "STHTTPRequest", "~> 1.1.0"
