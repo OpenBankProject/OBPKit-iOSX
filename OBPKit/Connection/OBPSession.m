@@ -22,6 +22,7 @@
 #import "OBPWebViewProvider.h"
 #import "OBPMarshal.h"
 #import "NSString+OBPKit.h"
+#import "STHTTPRequest+Error.h"
 
 
 
@@ -294,9 +295,26 @@ static OBPSessionArray* sSessions = nil;
 	if (self.state != OBPSessionStateValid && self.authMethod != OBPAuthMethod_None)
 		return NO;
 
+	HandleResultBlock		errorBlock = request.errorBlock;
+
 	// If auth header installed, chain error handler to check if token has been revoked
 	if ([self addAuthorizationHeaderToSTHTTPRequest: request])
-		request.errorBlock = [self detectRevokeBlockWithChainToBlock: request.errorBlock];
+		errorBlock = [self detectRevokeBlockWithChainToBlock: errorBlock];
+
+	if (errorBlock)
+	{
+		STHTTPRequest __weak*	request_ifStillAround = request;
+		errorBlock =
+			^(NSError* error)
+			{
+				STHTTPRequest*	request = request_ifStillAround;
+				// Add server-side description to error if available. (STHTTPRequest enhancement)
+				error = request ? [request errorByAddingServerSideDescriptionToError: error] : error;
+				errorBlock(error);
+			};
+	}
+
+	request.errorBlock = errorBlock;
 
 	return YES;
 }
@@ -417,6 +435,9 @@ static OBPSessionArray* sSessions = nil;
     request.errorBlock =
 		^(NSError *error)
 		{
+			STHTTPRequest *request = request_ifStillAround;
+			// Add server-side description to error if available. (STHTTPRequest enhancement)
+			error = request ? [request errorByAddingServerSideDescriptionToError: error] : error;
 			OBP_LOG(@"getAuthRequestToken got error %@", error);
 			[self completedWith: nil and: nil error: [NSError errorWithDomain: OBPSessionErrorDomain code: OBPSessionErrorCompletionError userInfo: @{NSUnderlyingErrorKey:error,NSURLErrorKey:request_ifStillAround.url?:[NSNull null]}]];
 		};
@@ -529,6 +550,9 @@ static OBPSessionArray* sSessions = nil;
     request.errorBlock =
 		^(NSError *error)
 		{
+			STHTTPRequest *request = request_ifStillAround;
+			// Add server-side description to error if available. (STHTTPRequest enhancement)
+			error = request ? [request errorByAddingServerSideDescriptionToError: error] : error;
 			OBP_LOG(@"getAccessToken got error %@", error);
 			[self completedWith: nil and: nil error: [NSError errorWithDomain: OBPSessionErrorDomain code: OBPSessionErrorCompletionError userInfo: @{NSUnderlyingErrorKey:error,NSURLErrorKey:request_ifStillAround.url?:[NSNull null]}]];
 		};
@@ -746,6 +770,9 @@ static OBPSessionArray* sSessions = nil;
     request.errorBlock =
 		^(NSError *error)
 		{
+			STHTTPRequest *request = request_ifStillAround;
+			// Add server-side description to error if available. (STHTTPRequest enhancement)
+			error = request ? [request errorByAddingServerSideDescriptionToError: error] : error;
 			OBP_LOG(@"getAuthToken got error %@", error);
 			[self endWithState: OBPSessionStateInvalid
 						  data: @{OBPServerInfo_TokenKey : @"", OBPServerInfo_TokenSecret : @""}

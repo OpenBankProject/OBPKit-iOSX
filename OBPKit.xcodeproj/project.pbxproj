@@ -46,6 +46,10 @@
 		AEA6FF461C98610F005C3A8B /* OBPServerInfoStore.h in Headers */ = {isa = PBXBuildFile; fileRef = AEA6FF431C98610F005C3A8B /* OBPServerInfoStore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AEA6FF471C986110005C3A8B /* OBPServerInfoStore.m in Sources */ = {isa = PBXBuildFile; fileRef = AEA6FF441C98610F005C3A8B /* OBPServerInfoStore.m */; };
 		AEA6FF481C986110005C3A8B /* OBPServerInfoStore.m in Sources */ = {isa = PBXBuildFile; fileRef = AEA6FF441C98610F005C3A8B /* OBPServerInfoStore.m */; };
+		AEF8813D1D13246A00824B18 /* STHTTPRequest+Error.h in Headers */ = {isa = PBXBuildFile; fileRef = AEF8813B1D13246A00824B18 /* STHTTPRequest+Error.h */; };
+		AEF8813E1D13246A00824B18 /* STHTTPRequest+Error.h in Headers */ = {isa = PBXBuildFile; fileRef = AEF8813B1D13246A00824B18 /* STHTTPRequest+Error.h */; };
+		AEF8813F1D13246A00824B18 /* STHTTPRequest+Error.m in Sources */ = {isa = PBXBuildFile; fileRef = AEF8813C1D13246A00824B18 /* STHTTPRequest+Error.m */; };
+		AEF881401D13246A00824B18 /* STHTTPRequest+Error.m in Sources */ = {isa = PBXBuildFile; fileRef = AEF8813C1D13246A00824B18 /* STHTTPRequest+Error.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -96,6 +100,8 @@
 		AE87F2C21C528BDA00D09FBC /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		AEA6FF431C98610F005C3A8B /* OBPServerInfoStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBPServerInfoStore.h; sourceTree = "<group>"; };
 		AEA6FF441C98610F005C3A8B /* OBPServerInfoStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OBPServerInfoStore.m; sourceTree = "<group>"; };
+		AEF8813B1D13246A00824B18 /* STHTTPRequest+Error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "STHTTPRequest+Error.h"; sourceTree = "<group>"; };
+		AEF8813C1D13246A00824B18 /* STHTTPRequest+Error.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "STHTTPRequest+Error.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -194,6 +200,8 @@
 				AE15C5101D074DD6004ED657 /* OBPDateFormatter.h */,
 				AE15C5111D074DD6004ED657 /* OBPDateFormatter.m */,
 				AE3BC07E1C7F6862001A1AE1 /* OBPLogging.h */,
+				AEF8813B1D13246A00824B18 /* STHTTPRequest+Error.h */,
+				AEF8813C1D13246A00824B18 /* STHTTPRequest+Error.m */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -261,6 +269,7 @@
 				AE15C5121D074DD6004ED657 /* OBPDateFormatter.h in Headers */,
 				AE3BC0871C7F6862001A1AE1 /* OBPWebViewProvider.h in Headers */,
 				AE3BC0931C7F6862001A1AE1 /* OBPLogging.h in Headers */,
+				AEF8813D1D13246A00824B18 /* STHTTPRequest+Error.h in Headers */,
 				AE3BC0831C7F6862001A1AE1 /* OBPSession.h in Headers */,
 				AEA6FF451C98610F005C3A8B /* OBPServerInfoStore.h in Headers */,
 				AE3BC08B1C7F6862001A1AE1 /* OBPMarshal.h in Headers */,
@@ -277,6 +286,7 @@
 				AE883F951D08A76500EC2DA4 /* OBPDateFormatter.h in Headers */,
 				AE3BC0941C7F6862001A1AE1 /* OBPLogging.h in Headers */,
 				AE3BC0881C7F6862001A1AE1 /* OBPWebViewProvider.h in Headers */,
+				AEF8813E1D13246A00824B18 /* STHTTPRequest+Error.h in Headers */,
 				AE3BC0801C7F6862001A1AE1 /* OBPServerInfo.h in Headers */,
 				AEA6FF461C98610F005C3A8B /* OBPServerInfoStore.h in Headers */,
 				AE3BC0841C7F6862001A1AE1 /* OBPSession.h in Headers */,
@@ -448,6 +458,7 @@
 				AE3BC0891C7F6862001A1AE1 /* OBPWebViewProvider.m in Sources */,
 				AE3BC08D1C7F6862001A1AE1 /* OBPMarshal.m in Sources */,
 				AE15C5131D074DD6004ED657 /* OBPDateFormatter.m in Sources */,
+				AEF8813F1D13246A00824B18 /* STHTTPRequest+Error.m in Sources */,
 				AE3BC0911C7F6862001A1AE1 /* NSString+OBPKit.m in Sources */,
 				AEA6FF471C986110005C3A8B /* OBPServerInfoStore.m in Sources */,
 			);
@@ -462,6 +473,7 @@
 				AE3BC08A1C7F6862001A1AE1 /* OBPWebViewProvider.m in Sources */,
 				AE3BC08E1C7F6862001A1AE1 /* OBPMarshal.m in Sources */,
 				AE883F941D08A75F00EC2DA4 /* OBPDateFormatter.m in Sources */,
+				AEF881401D13246A00824B18 /* STHTTPRequest+Error.m in Sources */,
 				AE3BC0921C7F6862001A1AE1 /* NSString+OBPKit.m in Sources */,
 				AEA6FF481C986110005C3A8B /* OBPServerInfoStore.m in Sources */,
 			);
