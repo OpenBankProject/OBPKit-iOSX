@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   s.public_header_files = "OBPKit/Connection/*.h", "OBPKit/Marshal/*.h", "OBPKit/Util/OBP*.h", "OBPKit/Util/NS*.h", "Framework/*.h"
   s.preserve_paths = "Config/*.xcconfig"
   s.requires_arc = true
-  s.dependency "STHTTPRequest", "~> 1.1.0"
-  s.dependency "OAuthCore", "~> 0.0.1"
-  s.dependency "UICKeyChainStore", "~> 2.1.0"
+  s.dependency "STHTTPRequest", "~> 1.1.3"
+  s.dependency "OAuthCore", "~> 0.0.2"
+  s.dependency "UICKeyChainStore", "~> 2.1.1"
 end
