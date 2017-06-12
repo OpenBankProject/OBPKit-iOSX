@@ -3,7 +3,7 @@
 //  OBPKit
 //
 //  Created by Torsten Louland on 18/02/2016.
-//  Copyright © 2016 TESOBE Ltd. All rights reserved.
+//  Copyright (c) 2016-2017 TESOBE Ltd. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -33,8 +33,8 @@ static NSString* const	OBPMarshalOptionErrorHandler				= @"errorHandler"; ///< O
 
 
 
-typedef void(^HandleOBPMarshalError)(NSError* error, NSString* path);
-typedef void(^HandleOBPMarshalData)(id deserializedObject, NSString* responseBody);
+typedef void(^HandleOBPMarshalError)(NSError* error, NSString* path); // (error, path)
+typedef void(^HandleOBPMarshalData)(id deserializedObject, NSString* responseBody); // (deserializedObject, responseBody)
 
 
 

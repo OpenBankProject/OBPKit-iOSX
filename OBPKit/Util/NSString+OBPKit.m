@@ -3,7 +3,7 @@
 //  OBPKit
 //
 //  Created by Torsten Louland on 25/01/2016.
-//  Copyright © 2016 TESOBE Ltd. All rights reserved.
+//  Copyright (c) 2016-2017 TESOBE Ltd. All rights reserved.
 //
 
 #import "NSString+OBPKit.h"

@@ -3,7 +3,7 @@
 //  OBPKit
 //
 //  Created by Torsten Louland on 23/01/2016.
-//  Copyright © 2016 TESOBE Ltd. All rights reserved.
+//  Copyright (c) 2016-2017 TESOBE Ltd. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -95,7 +95,7 @@ void OBPServerInfoCustomise(NSDictionary* config);
      // types for customise config dict values
 typedef OBPServerInfoArray*_Nonnull	(^OBPServerInfoLoadBlock)();
 typedef void						(^OBPServerInfoSaveBlock)(OBPServerInfoArray* entries);
-typedef NSString*_Nonnull			(^OBPClientCredentialCryptBlock)(NSString* _Nonnull credential);
+typedef NSString*_Nonnull			(^OBPClientCredentialCryptBlock)(NSString* _Nonnull credential); // (credential)
 typedef struct OBPCryptParams {
 	uint32_t algorithm; uint32_t options; size_t keySize, blockSize; uint8_t *key, *iv;
 } OBPCryptParams;

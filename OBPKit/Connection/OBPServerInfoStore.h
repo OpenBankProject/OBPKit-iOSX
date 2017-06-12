@@ -3,7 +3,7 @@
 //  OBPKit
 //
 //  Created by Torsten Louland on 15/03/2016.
-//  Copyright © 2016 TESOBE Ltd. All rights reserved.
+//  Copyright (c) 2016-2017 TESOBE Ltd. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface OBPServerInfoStore : NSObject
 - (instancetype)initWithPath:(nullable NSString*)path; ///< Designated initializer. \param path identifies the location to find/store archived data if non-nil; otherwise a default path is used, which on iOS is file AD.dat in the app's Documents directory, and on OSX is the file AD.dat in ~/Library/Application Support/<bundle id>.
 @property (nonatomic, strong, readonly) NSString* path; ///< \returns the path to which data is archived.
-@property (nonatomic, copy) NSArray<OBPServerInfo*>*_Nonnull entries; ///< -setEntries: synchronously writes the supplied entries to an archive at .path, while -entries reads and restores entries from the archive at .path.
+@property (nonatomic, copy) NSArray<OBPServerInfo*>*_Nonnull entries; ///< set synchronously writes the supplied entries to an archive at .path, while get synchronously reads and restores entries from the archive at .path.
 @end
 
 

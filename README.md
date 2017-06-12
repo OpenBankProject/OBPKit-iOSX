@@ -22,7 +22,7 @@ TESOBE Ltd.
 
 OBPKit allows you to easily connect your existing iOS and OSX apps to servers offering the [Open Bank Project API][API].
 
-It takes care of the authorisation process, and once the user has given your app to access his/her resources, it provides you with a helper to marshal resources through the API, or if you want to roll your own, you can use OBPKit to add authorisation headers to the requests you form yourself.
+It takes care of the authorisation process, and once the user has given your app permission to access his/her resources, it provides you with a helper to marshal resources through the API, or if you want to roll your own, you can use OBPKit to add authorisation headers to the requests you form yourself.
 
 You can look at the [HelloOBP-iOS][] and [HelloOBP-Mac][] sample applications to see OBPKit in use.
 

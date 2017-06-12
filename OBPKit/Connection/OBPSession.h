@@ -3,7 +3,7 @@
 //  OBPKit
 //
 //  Created by Torsten Louland on 23/01/2016.
-//  Copyright © 2016 TESOBE Ltd. All rights reserved.
+//  Copyright (c) 2016-2017 TESOBE Ltd. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -33,7 +33,7 @@ typedef NSObject<OBPWebViewProvider>* OBPWebViewProviderRef;
 
 
 typedef void(^HandleResultBlock)(NSError* _Nullable);
-typedef void(^ReceiveDirectLoginParamsBlock)(NSString* _Nullable username, NSString* _Nullable password);
+typedef void(^ReceiveDirectLoginParamsBlock)(NSString* _Nullable username, NSString* _Nullable password); // (username, password)
 typedef void(^ProvideDirectLoginParamsBlock)(ReceiveDirectLoginParamsBlock receiver);
 
 
