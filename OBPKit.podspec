@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "OBPKit"
-  s.version = "1.1.1"
+  s.version = "1.1.2"
   s.summary = "Ease access to servers offering the Open Bank Project API."
   s.description = "OBPKit is quick to integrate into your iOS app or OSX application, and makes authorisation of sessions and marshalling of resources through the Open Bank Project API simple and easy."
   s.homepage = "https://github.com/OpenBankProject/OBPKit-iOSX"
