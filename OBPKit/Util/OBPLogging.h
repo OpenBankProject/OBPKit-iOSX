@@ -43,7 +43,17 @@
 #endif
 
 #ifndef OBP_BREAK
-	#define OBP_BREAK do{}while(0)
+	#if DEBUG
+		#if TARGET_CPU_X86
+			#define OBP_BREAK do{if(1){__asm__("int $3\n" : : );}}while(0)
+		#elif TARGET_CPU_X86_64
+			#define OBP_BREAK do{if(1){__asm__("int $3\n" : : );}}while(0)
+		#else
+			#define OBP_BREAK do{}while(0)
+		#endif
+	#else
+		#define OBP_BREAK do{}while(0)
+	#endif
 #endif
 
 #define OBP_LOG_IF(test, fmt, ...) do{if(test)OBP_LOG(fmt, ##__VA_ARGS__);}while(0)
