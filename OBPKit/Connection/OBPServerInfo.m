@@ -332,8 +332,7 @@ OBPClientCredentialCryptBlock
 		[entry storePair: ePair_ClientKeyAndSecret from: @{}];
 		[entry storePair: ePair_TokenKeyAndSecret from: @{}];
 		entry.keyChainStore = nil;
-		if (entry.usable)
-			[self save];
+		[self save];
 	}
 }
 + (instancetype)addEntryForAPIServer:(NSString*)APIServer
