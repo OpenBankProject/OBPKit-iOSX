@@ -93,7 +93,7 @@ You can optionally customise any of: instance class, save & load blocks, credent
 void OBPServerInfoCustomise(NSDictionary* config);
 
      // types for customise config dict values
-typedef OBPServerInfoArray*_Nonnull	(^OBPServerInfoLoadBlock)();
+typedef OBPServerInfoArray*_Nonnull	(^OBPServerInfoLoadBlock)(void);
 typedef void						(^OBPServerInfoSaveBlock)(OBPServerInfoArray* entries);
 typedef NSString*_Nonnull			(^OBPClientCredentialCryptBlock)(NSString* _Nonnull credential); // (credential)
 typedef struct OBPCryptParams {

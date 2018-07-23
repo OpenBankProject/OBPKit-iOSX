@@ -465,7 +465,7 @@ static OBPDefaultWebViewProvider* sOBPWebViewProvider = nil;
 - (void)cancel:(id)sender
 {
 	[self dismissViewControllerAnimated: YES completion: ^{
-		[_owner webViewProviderVCDidClose: self];
+		[self->_owner webViewProviderVCDidClose: self];
 	}];
 }
 @end

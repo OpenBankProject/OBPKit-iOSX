@@ -418,8 +418,8 @@ static OBPSessionArray* sSessions = nil;
 				callbackResult = response[@"oauth_callback_confirmed"];
 				if([callbackResult isEqualToString: @"true"])
 				{
-					_requestToken = response[@"oauth_token"];
-					_requestTokenSecret = response[@"oauth_token_secret"];
+					self->_requestToken = response[@"oauth_token"];
+					self->_requestTokenSecret = response[@"oauth_token_secret"];
 					[self getUsersAuthorisation];
 					completedStage = YES;
 				}
@@ -466,12 +466,12 @@ static OBPSessionArray* sSessions = nil;
 			NSString*		requestToken;
 			NSString*		urlString = [url absoluteString];
 
-			if ([urlString hasPrefix: _callbackURLString])
+			if ([urlString hasPrefix: self->_callbackURLString])
 			if (nil != (parameters = [url.query extractURLQueryParams]))
 			if (nil != (requestToken = parameters[@"oauth_token"]))
-			if ([_requestToken isEqualToString: requestToken])
+			if ([self->_requestToken isEqualToString: requestToken])
 			{
-				_verifier = parameters[@"oauth_verifier"];
+				self->_verifier = parameters[@"oauth_verifier"];
 				[self getAccessToken];
 				return YES;
 			}

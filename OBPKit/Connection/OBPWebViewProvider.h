@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 typedef BOOL(^OBPWebNavigationFilter)(NSURL*); // return YES if the target URL has been reached
-typedef void(^OBPWebCancelNotifier)(); //
+typedef void(^OBPWebCancelNotifier)(void); //
 
 
 
