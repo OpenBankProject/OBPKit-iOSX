@@ -185,6 +185,9 @@ NSString* NSStringDescribingNSURLResponseAndData(NSHTTPURLResponse* response, NS
 	// Make the request and add its payload
 	requestPath = [session.serverInfo.APIBase stringForURLByAppendingPath: path];
 	request = [STHTTPRequest requestWithURLString: requestPath];
+	OBP_LOG_IF(!request, @"Unable to create request with path %@", requestPath);
+	if (!request)
+		return NO;
 	request.HTTPMethod = method;
 
 	if (payload)
