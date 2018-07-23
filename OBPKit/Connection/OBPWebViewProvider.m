@@ -167,8 +167,8 @@ static OBPDefaultWebViewProvider* sOBPWebViewProvider = nil;
 + (NSString*)callbackSchemeFromBundleIdentifier
 {
 	NSString*	scheme;
+	// RFC2396 sheme = [A-Za-z][A-Za-z0-9.-+]*
 	scheme = [@"x-" stringByAppendingString: [NSBundle mainBundle].bundleIdentifier];
-	scheme = [scheme stringByReplacingOccurrencesOfString: @"." withString: @"-"];
 	scheme = [scheme lowercaseString]; // uppercase is allowed but some servers return scheme converted to lowercase leading to roundtrip mismatch
 	// Remove characters not allowed in schemes by RFC2396
 	NSRange		rg;

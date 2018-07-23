@@ -14,6 +14,7 @@ TESOBE Ltd.
 	1.	[OBPMarshal](#obpmarshal)
 	1.	[OBPDateFormatter](#obpdateformatter)
 1.	[How to Use](#how-to-use)
+	1.	[Callback Schemes](#callback-schemes)
 1.	[Customising OBPMarshal Behaviour](#customising-obpmarshal-behaviour)
 
 
@@ -84,9 +85,9 @@ There are three main classes to use, one protocol to adopt and some helpers.
 
 #### OBPServerInfo
 
-An `OBPServerInfo` instance records the data necessary to access an OBP server. It stores sensitive credentials securely in the key chain.
+An `OBPServerInfo` *instance* records the data necessary to access an OBP server. It stores sensitive credentials securely in the key chain.
 
-The `OBPServerInfo` class keeps a persistent record of all complete instances. An instance is complete once its client key and secret have been set. You can typically obtain these for your app from https://host-serving-OBP-API/consumer-registration.
+The `OBPServerInfo` *class* keeps a persistent record of all complete instances. An instance is complete once its client key and secret have been set. You can typically obtain these for your app from https://host-serving-OBP-API/consumer-registration.
 
 You can use the `OBPServerInfo` class to keep a record of all the OBP servers for which you support a connection; usually you will just have one, but more are possible. `OBPServerInfo` instances are reloaded automatically when your app is launched.
 
@@ -105,6 +106,8 @@ The `OBPSession` class keeps track of the instances that are currently alive, an
 For OAuth, `OBPSession` needs some part of your app to act as an `OBPWebViewProvider` protocol adopter in order to show the user a web page when it is time to get authorisation to access his/her resources.
 
 If you don't provide an `OBPWebViewProvider` protocol adopter, then the `OBPDefaultWebViewProvider` class singleton will be used. It provides basic support, and you can choose whether an in-app or external web view is brought up by calling configuring with the class member `+configureToUseExternalWebViewer:withCallbackSchemeName:andInstallCallbackHook:`. There are advantages and disadvantages to both, as set out in the Xcode quick help for the class.
+
+See [Callback Schemes](#callback-schemes) below for important additional considerations.
 
 #### OBPMarshal
 
@@ -198,6 +201,33 @@ HandleOBPMarshalData	responseHandler =
 			   orErrorHandler: nil]; // nil ==> use default error handler
 ```
 
+#### Callback Schemes
+
+As part of the OAuth handshake, the API auth server will redirect to a callback URL that your app specifies. OBPKit handles this for you by using a default callback at `x-${PRODUCT_BUNDLE_IDENTIFIER:lower}://callback`. For example. the [HelloOBP-iOS][] bundle identifier is `com.tesobe.HelloOBP-iOS` and it therefore use a default callback of `x-com.tesobe.helloobp-ios://callback`. You need only take further action if you require a different callback. However, there are two important points to note:
+
+1.	The bundle identifier of your app should use characters that are legal in [RFC3986-Schemes][], i.e. `[-+.A-Za-z0-9]`; if this is not possible or desirable, then use a custom callback scheme.
+1.	For extra security, the API auth server requires that the callback URL your app specifies for redirect is the same as the one you gave when you registered your app as an API Consumer and got API keys in return. You can change the registered redirect URL at a later time (keep a note of the consumer id for this), but to save you the trouble, consider the bundle id you will use before registering and construct your callback URL accordingly.
+
+When using an external web view (as mentioned above in [OBPWebViewProvider](#obpwebviewprovider)), iOS and macOS use the scheme to uniquely identify the app that should receive the redirect URL. iOS and macOS detect these schemes by looking in your app bundle's info dictionary, hence you should add a section to your `info.plist` file as follows (viewing as source):
+
+```plist
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleURLName</key>
+      <string>callback</string>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>x-${PRODUCT_BUNDLE_IDENTIFIER:lower}</string>
+      </array>
+    </dict>
+  </array>
+```
+
+You can replace the bundle-derived scheme with your own custom scheme if need be, and likewise use a different callback name if necessary. `OBPDefaultWebViewProvider` helper function `+callbackSchemeWithName:` retrieves the scheme from the bundle info dictionary for you.
+
 ### Customising OBPMarshal Behaviour
 
 Most of the time, the default behaviour of `OBPMarshal` is what you will want, but for special situations you can easily override the default `OBPMarshal` behaviour by passing an options dictionary in with your calls:
@@ -224,3 +254,4 @@ Most of the time, the default behaviour of `OBPMarshal` is what you will want, b
 [Carthage-install]: https://github.com/Carthage/Carthage/blob/master/README.md#installing-carthage
 [CocoaPods]: https://github.com/CocoaPods/CocoaPods/blob/master/README.md
 [CocoaPods-install]: http://guides.cocoapods.org/using/getting-started.html#installation
+[RFC3986-Schemes]: https://tools.ietf.org/html/rfc3986#section-3.1
